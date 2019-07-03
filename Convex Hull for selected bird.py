@@ -1,4 +1,5 @@
 import numpy as np
+import os
 import arcpy
 import math
 from matplotlib import cm
@@ -104,12 +105,33 @@ def create_convex_hull(input,output_name, distance):
     arcpy.management.MinimumBoundingGeometry("in_memory\\"+ output_name +"buffer_output_comb_max_Inter", output_name + "territory_bb", "CONVEX_HULL", "ALL", None,
                                              "NO_MBG_FIELDS")
 ##Inputs from Charly Brown
+path_Shp = arcpy.GetParameterAsText(0)
+buffer_size_default = arcpy.GetParameterAsText(1)
+buffer_size_customized = arcpy.GetParameterAsText(2)
+val_filter_gender = arcpy.GetParameterAsText(3)
+path_csv_gender = arcpy.GetParameterAsText(4)
+selected_gender = arcpy.GetParameterAsText(5)
+val_filter_season = arcpy.GetParameterAsText(6)
+selected_seasons = arcpy.GetParameterAsText(7)
+val_filter_birds = arcpy.GetParameterAsText(8)
+selected_bird_ids = arcpy.GetParameterAsText(9)
+output_folder = arcpy.GetParameterAsText(10)
+log = arcpy.GetParameterAsText(11)
+
+#Creation of GDB within the folder selected by the user
+arcpy.CreateFileGDB_management(path_Shp, "budo_budo.gdb")
+arcpy.env.workspace = os.path.join(path_Shp, "budo_budo.gdb")
+
+df_metadata = pd.read_csv(path_csv_gender)
+
+
+'''
 arcpy.env.workspace = r'D:\Master_Shareverzeichnis\2.Semester\PythonGIS\FinalProject\budo_budo.gdb'
 selected_seasons = []
 selected_bird_ids = ["1751", "1292"]
 selected_gender = []
 buffer_size = 15
-df_metadata = pd.read_csv(r'D:\Master_Shareverzeichnis\2.Semester\PythonGIS\FinalProject\movebank\eagle_owl\Eagle owl Reinhard Vohwinkel MPIO-reference-data.csv')
+df_metadata = pd.read_csv(r'D:\Master_Shareverzeichnis\2.Semester\PythonGIS\FinalProject\movebank\eagle_owl\Eagle owl Reinhard Vohwinkel MPIO-reference-data.csv')'''
 
 #change ID type to string
 df_metadata["tag-id"] = df_metadata["tag-id"].astype(str)
