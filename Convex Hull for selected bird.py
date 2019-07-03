@@ -10,7 +10,6 @@ import scipy.stats as stats
 import datetime
 from arcpy import env, analysis, management
 from arcpy.sa import *
-arcpy.env.workspace = r'D:\Master_Shareverzeichnis\2.Semester\PythonGIS\FinalProject\budo_budo.gdb'
 arcpy.CheckOutExtension('Spatial')
 arcpy.env.overwriteOutput = True
 from functools import reduce
@@ -46,7 +45,10 @@ def update_datetime_to_seasons(input_features):
                 dt_cursor.updateRow(row)
 
 def select_features_by_season(input_features, selected_seasons, output_name):
-    qry = """time IN {0}""".format(str(tuple(selected_seasons)))
+    if len(selected_seasons) >1 :
+        qry = """time IN {0}""".format(str(selected_seasons))
+    else:
+        qry = "time" + "= '" + str(selected_seasons[0]) + "'"
     arcpy.Select_analysis(input_features, output_name, qry)
 
 
@@ -103,9 +105,9 @@ def create_convex_hull(input,output_name, distance):
                                              "NO_MBG_FIELDS")
 ##Inputs from Charly Brown
 arcpy.env.workspace = r'D:\Master_Shareverzeichnis\2.Semester\PythonGIS\FinalProject\budo_budo.gdb'
-selected_seasons = ["spring", "summer"]
+selected_seasons = []
 selected_bird_ids = ["1751", "1292"]
-selected_gender = ["m"]
+selected_gender = []
 buffer_size = 15
 df_metadata = pd.read_csv(r'D:\Master_Shareverzeichnis\2.Semester\PythonGIS\FinalProject\movebank\eagle_owl\Eagle owl Reinhard Vohwinkel MPIO-reference-data.csv')
 
