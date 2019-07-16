@@ -7,8 +7,6 @@ import arcpy
 import datetime
 from arcpy import env, analysis, management
 from arcpy.sa import *
-
-#set the output reference system the German DHDN
 arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(3035)
 arcpy.CheckOutExtension('Spatial')
 arcpy.env.overwriteOutput = True
@@ -17,7 +15,6 @@ from datetime import datetime
 import time
 import os
 
-#Get all input parameters
 shapefile_birds = arcpy.GetParameterAsText(0)
 csv_owl_metadata = arcpy.GetParameterAsText(1)
 buffer_distance_territory = arcpy.GetParameterAsText(2)
@@ -36,30 +33,26 @@ landuse_InfoTable = r"landuse.gdb\CLC2012_DEv_Statistics3"
 def main(shapefile_birds, buffer_distance_territory, buffer_distance_territory_other,
          csv_owl_metadata, select_gender_boolean,selected_gender, select_seasons_boolean, selected_seasons, select_bird_id_boolean,
          selected_bird_ids, workspace, landuse_InputFeatures_name, landuse_info_table):
-    #an output database with the territories as well as a trash gdb is defined, which will be deleted later. An approach using in memory data was slower as there #were too many layers in memory, especially when all birds are selected
     arcpy.CreateFileGDB_management(workspace, "owlsGDB.gdb")
     trash = arcpy.CreateFileGDB_management(workspace, "trash.gdb")
     trash_path = os.path.join(workspace, "trash.gdb")
     arcpy.env.workspace = workspace + r"\owlsGDB.gdb"
 
-    #the buffer_distance is a default value of a list of which the user can choose. The  buffer_distance_territory_other is only chosen if the user defines a custom #buffer distance
     if buffer_distance_territory is None:
         buffer_size = buffer_distance_territory_other
     else:
         buffer_size = buffer_distance_territory
 
-    #if no specific birds are chosen, all are being used
     if select_bird_id_boolean.lower() == 'false':
         selected_bird_ids = []
-    
-    #If no specific season is selected, all are being used
+
     if select_seasons_boolean.lower() == 'false':
         selected_seasons = ["Spring", "Summer", "Fall", "Winter"]
 
     df_metadata = pd.read_csv(csv_owl_metadata)
     df_metadata["tag-id"] = df_metadata["tag-id"].astype(str)
 
-    # Do the actual calculation of the territories. The method is decribed below
+    # Do the actual calculation of the territories
     get_territories_from_selected_features(shapefile_birds, selected_seasons, selected_bird_ids,
                                            buffer_size, trash_path, df_metadata)
 
@@ -73,7 +66,7 @@ def main(shapefile_birds, buffer_distance_territory, buffer_distance_territory_o
     #drop all rows wo landuse information
     #territory_w_landuse_df = territory_w_landuse_df.dropna(subset=['season'], inplace=True)
 
-    # Generate aggregated pandas dataframes as input for plots, save them in workspace
+    # Generate aggregated pandas dataframes as input for plots
     general_info = aggregate_general_bubo_landuse_information(territory_w_landuse_df)
     general_info.to_csv(os.path.join(workspace, "general_info.csv"))
 
@@ -87,12 +80,11 @@ def main(shapefile_birds, buffer_distance_territory, buffer_distance_territory_o
     specific_info_gender.to_csv(os.path.join(workspace, 'specific_info_gender.csv'))
 
     # logic for the plots, which depends on the selection and the available data
-    # 
-    # logic 0: no condition           -->  display the general information of the landuse:  data_preparation_CLC_graphs(path_CLC_shp,general_info, 0)
+    # logic 0: no condition           -->    data_preparation_CLC_graphs(path_CLC_shp,general_info, 0)
 
-    # logic 1: select_gender_boolean -->   display the graph of male and female birds  if male and female exist: #                         #data_preparation_CLC_graphs(path_CLC_shp,specific_landuse_info_gender, 1)
+    # logic 1: select_gender_boolean -->     if male and female exist: data_preparation_CLC_graphs(path_CLC_shp,specific_landuse_info_gender, 1)
 
-    # logic 2: select_seasons_boolean -->  display the graph of different seasons if more than 1 seasons exists #:data_preparation_CLC_graphs(path_CLC_shp,specific_landuse_info_season, 2)
+    # logic 2: select_seasons_boolean -->    if more than 1 seasons exists :data_preparation_CLC_graphs(path_CLC_shp,specific_landuse_info_season, 2)
 
     #function for logic one
     def plot_gender_info():
@@ -105,7 +97,6 @@ def main(shapefile_birds, buffer_distance_territory, buffer_distance_territory_o
         # give plot if specific info for season required and more than one season exists
         if specific_landuse_info_season["season"].nunique() > 1:
             data_preparation_CLC_graphs(landuse_info_table, specific_landuse_info_season,workspace, 2)
-            
     #function logic 3
     def plot_selected_birds_info():
         if whole_dataframe["tag_ident"].nunique() > 1:
@@ -141,7 +132,7 @@ def unique_values(table, field):
 
 def select_features(input_data, output_data, field_name, selection_value):
     start = time.time()
-    # this function does an attribute selection in a more generic way than the standard arcpy.Select_analysis
+    # this function does a attribute selection in a more generic way than the standard arcpy.Select_analysis
     qry = str(field_name) + "= '" + str(selection_value) + "'"
     arcpy.Select_analysis(input_data, output_data, qry)
     end = time.time()
@@ -149,7 +140,6 @@ def select_features(input_data, output_data, field_name, selection_value):
 
 
 def update_datetime_to_seasons(input_features):
-    #this function fills the empty column "time" with the season names which are derived from column "timestamp"
     start = time.time()
     with arcpy.da.UpdateCursor(input_features, ["timestamp", "time"]) as dt_cursor:
         for row in dt_cursor:
@@ -168,7 +158,6 @@ def update_datetime_to_seasons(input_features):
     print("Time for update_datetime_to_seasons: " + str(end - start))
 
 def select_features_by_season(input_features, selected_seasons, output_name):
-    # this function makes it possible to select only data of points.shp with a specific season
     start = time.time()
     if len(selected_seasons) > 1:
         qry = """time IN {0}""".format(str(selected_seasons))
@@ -179,7 +168,6 @@ def select_features_by_season(input_features, selected_seasons, output_name):
     print("Time for select_features_by_season: " + str(end - start))
 
 def filter_by_gender(bird_ids, metadata, selected_gender):
-    # this function makes it possible to filter by a selected gender
     remaining_ids = []
     for i in bird_ids:
         if metadata[metadata["tag-id"]== str(i)]["gender"] == selected_gender:
@@ -188,8 +176,6 @@ def filter_by_gender(bird_ids, metadata, selected_gender):
 
 def get_territories_from_selected_features(all_birds, selected_seasons, selected_bird_ids, buffer_size, trash,
                                            metadata=None):
-    #this funtion calculates the territories. Logic for selections: If a selection exists for birds, the specific bird ids are saved in array selected_birds.  #Otherwise all unique birds of birds.shp are used
-    
     unique_bird_ids = unique_values(all_birds, 'tag_ident')
     selected_birds = unique_bird_ids
     # Get all tag_idents with the timestamp and save in numpy array
@@ -198,15 +184,12 @@ def get_territories_from_selected_features(all_birds, selected_seasons, selected
         for unique_id in unique_bird_ids:
             if unique_id in selected_bird_ids:
                 selected_birds.append(unique_id)
-                
     #fill the empty column "time" with the season
     update_datetime_to_seasons(all_birds)
-    
-    #if a gender is selected, filter these points
+
     if select_gender_boolean.lower == "true":
         selected_birds = filter_by_gender(selected_birds, metadata, selected_gender)
-    
-    #create the territory for all seasons for each selected bird. The territory shapefile will only be saved if it is contains data
+
     for season_iterator in range(len(selected_seasons)):
         select_features_by_season(all_birds, [selected_seasons[season_iterator]],
                                   trash + "\selected_Points_for_convex_hull" + selected_seasons[season_iterator])
@@ -218,7 +201,6 @@ def get_territories_from_selected_features(all_birds, selected_seasons, selected
                             unique_bird_id)
             bird = metadata[metadata["tag-id"] == unique_bird_id]
             gender = bird["animal-sex"].values[0]
-            #in this step, the convex hull is calculated
             create_convex_hull("bird_" + str(unique_bird_id) + selected_seasons[season_iterator],
                                "conv_hull_" + str(unique_bird_id) + selected_seasons[season_iterator], buffer_size,
                                unique_bird_id, selected_seasons[season_iterator], gender, trash)
@@ -229,7 +211,6 @@ def get_territories_from_selected_features(all_birds, selected_seasons, selected
 
 def create_convex_hull(input, output_name, distance, bird_id, season, gender, trash):
     start = time.time()
-    #first check if data already exists with the same name. If so, delete it
     if arcpy.Exists(trash + "\\" + output_name + "buffer_output"):
         arcpy.Delete_management(trash + "\\" + output_name + "buffer_output")
     if arcpy.Exists(output_name + "buffer_output_comb"):
@@ -238,7 +219,7 @@ def create_convex_hull(input, output_name, distance, bird_id, season, gender, tr
         arcpy.Delete_management(trash + "\\" + output_name + "buffer_output_comb_max_Inter")
     if arcpy.Exists(output_name + "territory_bb"):
         arcpy.Delete_management(output_name + "territory_bb")
-    # this function creates the convex hulls for the territories. Logic:
+    # this function creates the convex hulls for the territories.
     # 1. Create buffers around the points with a dissolve type all (every points leads to one buffer)
     # 2. Overlapping buffers will be combined to one feature with arcpy.MultipartToSinglepart
     # 3. The biggest shape will be considered as the convex hull for the territory for the specific bird with the selected points
@@ -263,13 +244,11 @@ def create_convex_hull(input, output_name, distance, bird_id, season, gender, tr
         arcpy.management.MinimumBoundingGeometry(trash + "\\" + output_name + "buffer_output_comb_max_Inter",
                                                  output_name + "territory_bb", "CONVEX_HULL", "ALL", None,
                                                  "NO_MBG_FIELDS")
-        #add the columns for tag_ident, season and gender in the shapefile
         arcpy.AddField_management(output_name + "territory_bb", "tag_ident", "TEXT", 9, "", "", "tag_ident", "NULLABLE")
         arcpy.AddField_management(output_name + "territory_bb", "season", "TEXT", 9, "", "", "season", "NULLABLE")
         arcpy.AddField_management(output_name + "territory_bb", "gender", "TEXT", 9, "", "", "gender", "NULLABLE")
         cursor = arcpy.UpdateCursor(output_name + "territory_bb")
         row = cursor.next()
-        #fill the new columns with the data
         while row:
             row.setValue("tag_ident", str(bird_id))
             row.setValue("season", season)
@@ -282,7 +261,6 @@ def create_convex_hull(input, output_name, distance, bird_id, season, gender, tr
 
 
 def extract_landuse_information(landuse_vector):
-    # Merge all created territories to make the information extraction faster. Intersect this shapefile with the landuse to get the information of the landuse
     start = time.time()
     fcList = arcpy.ListFeatureClasses()
     input_merge = []
@@ -305,7 +283,6 @@ def extract_landuse_information(landuse_vector):
 
 
 def generate_bubo_df(input_shapefile):
-    #This function creates a pandas dataframe. To do this, the feature table is first converted to a numpy array
     return pd.DataFrame(
         arcpy.da.FeatureClassToNumPyArray(input_shapefile,
                                           ["tag_ident", "season", "gender", "CLC_CODE", "LABEL3v2", "Shape_Area"],
@@ -314,20 +291,17 @@ def generate_bubo_df(input_shapefile):
 
 
 def aggregate_general_bubo_landuse_information(input_df):
-    #aggregation of pandas df for the general information
     general_landuse_info = input_df.groupby(["CLC_CODE","LABEL3v2"], as_index=False)[['Shape_Area']].mean()
     return general_landuse_info
 
 
 def aggregate_specific_bubo_landuse_information(input_df, aggregate_column=None):
-    #aggregation of pandas df for the specific landuse information
     column_specific_info_with_landuse = input_df.groupby([aggregate_column,"CLC_CODE","LABEL3v2"], as_index=False)[
         ['Shape_Area']].mean()
     return column_specific_info_with_landuse
 
 
 def aggregate_specific_column(input_df, aggregate_column=None):
-    #aggregation of pandas df for a selected column, which can be given as input
     column_specific_info = input_df.groupby(["CLC_CODE",aggregate_column], as_index=False)[['Shape_Area']].mean()
     return column_specific_info
 
