@@ -420,6 +420,10 @@ def createRadarSeasons(name_bubo_bubo, data_values, attributes, row, color_var, 
     print("Creating graph per seasons")
     #the instruction bellow allows wrapping the labels for each land-use class according to specific amount of characters
     attributes = [ '\n'.join(wrap(l, 17)) for l in attributes]
+    title_Bubo_Bubo = []
+    title_Bubo_Bubo.append(name_bubo_bubo)
+    title_Bubo_Bubo = [ '\n'.join(wrap(l, 57)) for l in title_Bubo_Bubo]
+    name_bubo_bubo = title_Bubo_Bubo[0]
     #addition of the first value of the list at the end in order to close the data sets for the radar chart
     data_values += data_values [:1]
     #calculation of the angles where the axes for the labels are going to take place, in this case is fixed to 6
@@ -502,7 +506,7 @@ def data_preparation_CLC_graphs(path_summary_table, data_filtered,workspace, typ
         else:
             types_LC = types_LC[0:6]
             area_totals = area_totals[0:6]
-        createRadarGeneral("Sum area of all selected Bubo Bubos (ha)", area_totals, types_LC,workspace,)
+        createRadarGeneral("Top six largest sums of land usages of all selected Bubo Bubos (ha)", area_totals, types_LC,workspace,)
     ###Case when the user wants the graphs per gender
     elif type_request == 1:
         # Filtering dataset for males
@@ -568,7 +572,7 @@ def data_preparation_CLC_graphs(path_summary_table, data_filtered,workspace, typ
             print(final_attributes)
             print(area_totals_males)
             print(area_totals_females)
-            createRadarGender("Mean area of selected male and female Bubo Bubos (ha)", area_totals_males, area_totals_females, final_attributes,workspace,)
+            createRadarGender("Top six largest mean land usages of selected Bubo Bubos per gender (ha)", area_totals_males, area_totals_females, final_attributes,workspace,)
     ###Case when the user wants the graphs per season
     elif type_request == 2:
         #getting the seasons from the dataset
@@ -616,7 +620,7 @@ def data_preparation_CLC_graphs(path_summary_table, data_filtered,workspace, typ
                 types_LC = types_LC[0:6]
                 area_totals = area_totals[0:6]
 
-            createRadarSeasons("Mean area of Bubo Bubos in " + season + " (ha)", area_totals, types_LC, row, my_palette(row), maximum_Value_Area/10000)
+            createRadarSeasons("Top 6 largest mean land usages of selected Bubo Bubos in " + season + " (ha)", area_totals, types_LC, row, my_palette(row), maximum_Value_Area/10000)
             row += 1
 
         plt.tight_layout()
