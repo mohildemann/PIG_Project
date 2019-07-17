@@ -27,6 +27,7 @@ select_bird_id_boolean = arcpy.GetParameterAsText(8)
 selected_bird_ids = arcpy.GetParameterAsText(9)
 workspace = arcpy.GetParameterAsText(10)
 landuse_InputFeatures_name = r"landuse.gdb\CLC2012_DEv"
+#in order to save calculation time, the statistics of the landcover were calculated beforehand.
 landuse_InfoTable = r"landuse.gdb\CLC2012_DEv_Statistics3"
 
 
