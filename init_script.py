@@ -27,6 +27,7 @@ select_bird_id_boolean = arcpy.GetParameterAsText(8)
 selected_bird_ids = arcpy.GetParameterAsText(9)
 workspace = arcpy.GetParameterAsText(10)
 landuse_InputFeatures_name = r"landuse.gdb\CLC2012_DEv"
+#in order to save calculation time, the statistics of the landcover were calculated beforehand.
 landuse_InfoTable = r"landuse.gdb\CLC2012_DEv_Statistics3"
 
 
@@ -291,24 +292,27 @@ def generate_bubo_df(input_shapefile):
 
 
 def aggregate_general_bubo_landuse_information(input_df):
-    general_landuse_info = input_df.groupby(["CLC_CODE","LABEL3v2"], as_index=False)[['Shape_Area']].mean()
+    #this aggregations is done with the sum, so it is better to compare it to the data of corine landcover
+    general_landuse_info = input_df.groupby(["CLC_CODE","LABEL3v2"], as_index=False)[['Shape_Area']].sum()
     return general_landuse_info
 
 
 def aggregate_specific_bubo_landuse_information(input_df, aggregate_column=None):
+    #this aggregations is done with the mean instead of the sum, as there is more data for male than female birds
     column_specific_info_with_landuse = input_df.groupby([aggregate_column,"CLC_CODE","LABEL3v2"], as_index=False)[
         ['Shape_Area']].mean()
     return column_specific_info_with_landuse
 
 
 def aggregate_specific_column(input_df, aggregate_column=None):
+    #this aggregations is done with the mean instead of the sum, as there is more data for summer then for winter etc.
     column_specific_info = input_df.groupby(["CLC_CODE",aggregate_column], as_index=False)[['Shape_Area']].mean()
     return column_specific_info
 
 
 def bird_specific_info(input_df, bird_ids):
     input_df_filter = input_df[input_df['tag_ident'].isin([bird_ids])]
-    info_for_specific_birds = input_df_filter.groupby(["CLC_CODE","LABEL3v2"], as_index=False)[['Shape_Area']].mean()
+    info_for_specific_birds = input_df_filter.groupby(["CLC_CODE","LABEL3v2"], as_index=False)[['Shape_Area']].sum()
     return info_for_specific_birds
 
 
