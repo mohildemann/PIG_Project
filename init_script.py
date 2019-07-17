@@ -108,7 +108,7 @@ def main(shapefile_birds, buffer_distance_territory, buffer_distance_territory_o
     #call the plot functions,
     # give general information in each case
     data_preparation_CLC_graphs(landuse_info_table,general_info,workspace, 0)
-   
+
     plot_gender_info()
     plot_season_info()
 
@@ -312,57 +312,29 @@ def bird_specific_info(input_df, bird_ids):
     return info_for_specific_birds
 
 
-# Function to create Radar Chart by comparing female and male bubo bubos
+# Function to create Radar Chart by comparing female and male bubo bubos, depending on the specific bubo bubos selected or all bubo bubos
 def createRadarGender(name_bubo_bubo, data_values_m, data_values_f, attributes, workspace):
     print("Creating graph with gender information")
+    #the instruction bellow allows wrapping the labels for each land-use class according to specific amount of characters
     attributes = ['\n'.join(wrap(l, 11)) for l in attributes]
+    #addition of the first value of the list at the end in order to close the data sets for the radar chart
     data_values_m += data_values_m[:1]
     data_values_f += data_values_f[:1]
+    #calculation of the angles where the axes for the labels are going to take place, in this case is fixed to 6
     angles = [n / 6 * 2 * pi for n in range(6)]
     angles += angles[:1]
     angles2 = [n / 6 * 2 * pi for n in range(6)]
     angles2 += angles2[:1]
+    #creation of the subplots
     ax = plt.subplot(111, polar=True)
     ax = plt.subplot(111, polar=True)
     plt.xticks(angles[:-1], attributes)
+    #including the datasets for female and male bubo bubos
     ax.plot(angles, data_values_m)
     ax.fill(angles, data_values_m, 'blue', alpha=0.1)
     ax.plot(angles2, data_values_f)
     ax.fill(angles2, data_values_f, 'red', alpha=0.1)
-    ax.set_title(name_bubo_bubo)
-    labels = ('Males', 'Females')
-    legend = ax.legend(labels, loc=(0.9, .95),
-                       labelspacing=0.1, fontsize='small')
-    plt.savefig(os.path.join(workspace, "genders.png"))
-    plt.show()
-    plt.close() 
-
-    
-
-# Function to create Radar Chart in a general overview for all the bubo bubos
-def createRadarGeneral(name_bubo_bubo, data_values, attributes,workspace):
-    print("Creating graph general")
-    attributes = ['\n'.join(wrap(l, 11)) for l in attributes]
-    data_values += data_values[:1]
-    angles = [n / 6 * 2 * pi for n in range(6)]
-    angles += angles[:1]
-    ax = plt.subplot(111, polar=True)
-    plt.xticks(angles[:-1], attributes)
-    ax.plot(angles, data_values)
-    ax.fill(angles, data_values, 'orange', alpha=0.1)
-    ax.set_title(name_bubo_bubo)
-    plt.savefig(os.path.join(workspace,"general.png"))
-    plt.show()
-    plt.close() 
-
-# Function to create Radar Chart per each season for the bubo bubos
-def createRadarSeasons(name_bubo_bubo, data_values, attributes, row, color_var, max_value):
-    print("Creating graph season")
-    attributes = [ '\n'.join(wrap(l, 17)) for l in attributes]
-    data_values += data_values [:1]
-    angles = [n / 6 * 2 * pi for n in range(6)]
-    angles += angles [:1]
-    ax = plt.subplot(2,2,row+1, polar=True)
+    #loop to move the labels a bit outside of the graph according to the angle that leads the position of the label
     for theta, label in zip(ax.get_xticks(), ax.get_xticklabels()):
         theta = theta * ax.get_theta_direction() + ax.get_theta_offset()
         theta = np.pi/2 - theta
@@ -384,34 +356,132 @@ def createRadarSeasons(name_bubo_bubo, data_values, attributes, row, color_var, 
         else:
             label.set_horizontalalignment('left')
             label.set_verticalalignment('top')
+    ax.set_title(name_bubo_bubo, y = 1.1)
+    #setting up the legend
+    labels = ('Males', 'Females')
+    legend = ax.legend(labels, loc=(1, 1),
+                       labelspacing=0.1, fontsize='small')
+    #saving the plot
+    plt.savefig(os.path.join(workspace, "genders.png"))
+    plt.show()
+    plt.close()
 
+
+
+# Function to create Radar Chart in a general overview for all the bubo bubos or the ones selected by the user
+def createRadarGeneral(name_bubo_bubo, data_values, attributes,workspace):
+    print("Creating graph general")
+    #the instruction bellow allows wrapping the labels for each land-use class according to specific amount of characters
+    attributes = ['\n'.join(wrap(l, 11)) for l in attributes]
+    #addition of the first value of the list at the end in order to close the data sets for the radar chart
+    data_values += data_values[:1]
+    #calculation of the angles where the axes for the labels are going to take place, in this case is fixed to 6
+    angles = [n / 6 * 2 * pi for n in range(6)]
+    angles += angles[:1]
+    #creation of the subplots
+    ax = plt.subplot(111, polar=True)
+    plt.xticks(angles[:-1], attributes)
+    ax.plot(angles, data_values)
+    #loop to move the labels a bit outside of the graph according to the angle that leads the position of the label
+    for theta, label in zip(ax.get_xticks(), ax.get_xticklabels()):
+        theta = theta * ax.get_theta_direction() + ax.get_theta_offset()
+        theta = np.pi/2 - theta
+        y, x = np.cos(theta), np.sin(theta)
+        if y >= 0.5 and x==0:
+            label.set_verticalalignment('bottom')
+        elif y >= 0.5 and x > 0.1:
+            label.set_verticalalignment('bottom')
+            label.set_horizontalalignment('left')
+        elif y <= -0.5 and x == 0:
+            label.set_verticalalignment('top')
+        elif y >= -0.5 and x <= -0.1:
+            label.set_verticalalignment('top')
+            label.set_horizontalalignment('right')
+        elif x >= 0.1 and y == 0:
+            label.set_horizontalalignment('left')
+        elif x <= -0.1 and y ==0:
+            label.set_horizontalalignment('right')
+        else:
+            label.set_horizontalalignment('left')
+            label.set_verticalalignment('top')
+    ax.fill(angles, data_values, 'orange', alpha=0.1)
+    #setting up the title and saving the plot
+    ax.set_title(name_bubo_bubo, y = 1.1)
+    plt.savefig(os.path.join(workspace,"general.png"))
+    plt.show()
+    plt.close()
+
+# Function to create Radar Chart per each season for the bubo bubos selected by the user
+def createRadarSeasons(name_bubo_bubo, data_values, attributes, row, color_var, max_value):
+    print("Creating graph per seasons")
+    #the instruction bellow allows wrapping the labels for each land-use class according to specific amount of characters
+    attributes = [ '\n'.join(wrap(l, 17)) for l in attributes]
+    #addition of the first value of the list at the end in order to close the data sets for the radar chart
+    data_values += data_values [:1]
+    #calculation of the angles where the axes for the labels are going to take place, in this case is fixed to 6
+    angles = [n / 6 * 2 * pi for n in range(6)]
+    angles += angles [:1]
+    ax = plt.subplot(2,2,row+1, polar=True)
+    #loop to move the labels a bit outside of the graph according to the angle that leads the position of the label
+    for theta, label in zip(ax.get_xticks(), ax.get_xticklabels()):
+        theta = theta * ax.get_theta_direction() + ax.get_theta_offset()
+        theta = np.pi/2 - theta
+        y, x = np.cos(theta), np.sin(theta)
+        if y >= 0.5 and x==0:
+            label.set_verticalalignment('bottom')
+        elif y >= 0.5 and x > 0.1:
+            label.set_verticalalignment('bottom')
+            label.set_horizontalalignment('left')
+        elif y <= -0.5 and x == 0:
+            label.set_verticalalignment('top')
+        elif y >= -0.5 and x <= -0.1:
+            label.set_verticalalignment('top')
+            label.set_horizontalalignment('right')
+        elif x >= 0.1 and y == 0:
+            label.set_horizontalalignment('left')
+        elif x <= -0.1 and y ==0:
+            label.set_horizontalalignment('right')
+        else:
+            label.set_horizontalalignment('left')
+            label.set_verticalalignment('top')
+    #setting the colors for each one of the seasons
     plt.xticks(angles[:-1], attributes)
     axes = ax.plot(angles,data_values, color=color_var)
     ax.fill(angles, data_values, color=color_var, alpha=0.1)
     ax.set_title(name_bubo_bubo, y=1.2)
+    #setting the same scale
     plt.ylim(0, round(max_value))
 
-
+#Function that manages the creation of graphics according to the selection made by the user
 def data_preparation_CLC_graphs(path_summary_table, data_filtered,workspace, type_request):
     dic_codes = {}
     default_field_ord_area = []
     default_cod_ord_area = []
     print("Calculating dictionary and other arrays")
+    #getting the general values from the corine land cover in order to know the order of the land uses according to the area
     for row in arcpy.da.SearchCursor(path_summary_table, ['CLC_CODE', 'LABEL3v2', 'SUM_Shape_Area'],
                                      sql_clause=(None, 'ORDER BY SUM_Shape_Area DESC')):
         dic_codes[row[0]] = row[1]
         default_field_ord_area.append(row[1])
         default_cod_ord_area.append(row[0])
-    # Call the fucntion to build the graph general
+
+    ### Call the function to build the graph general
     if type_request == 0:
         types_LC = []
         area_totals = []
         codes_CLC = []
+        #sorting the dataframe by area
+        final_data_filtered = data_filtered.sort_values(by=['Shape_Area'], ascending=False)
+        final_data_filtered = final_data_filtered.reset_index()
         i = 0
+        #tunnig the final array that feed the function in charge to build the graph
+        #the values are divided by 10000 in order to have values in hectares
         for i in range(len(data_filtered)):
             types_LC.append(dic_codes[data_filtered.CLC_CODE[i]])
             codes_CLC.append(str(data_filtered.CLC_CODE[i]))
             area_totals.append(data_filtered.Shape_Area[i] / 10000)
+        #case when the dataset has more than 6 land-use classes:
+        #in this case only are selected the top 6 with more amount of area
         len_initial_types_LC = len(types_LC)
         if len_initial_types_LC < 6:
             for i in default_field_ord_area:
@@ -421,27 +491,37 @@ def data_preparation_CLC_graphs(path_summary_table, data_filtered,workspace, typ
                 print(types_LC)
                 if len(types_LC) >= 6:
                     break
+        #case when the dataser has less than 6 land-use classes:
+        #in this case the remaning slots for the graph are filled when selecting other land-use classes \
+        #according to the descending order of the area given by the original corine land cover for the\
+        #whole germany with a value of 0.
         else:
             types_LC = types_LC[0:6]
             area_totals = area_totals[0:6]
-        createRadarGeneral("All Bubo Bubos", area_totals, types_LC,workspace,)
+        createRadarGeneral("Sum area of all selected Bubo Bubos (ha)", area_totals, types_LC,workspace,)
     ###Case when the user wants the graphs per gender
     elif type_request == 1:
-        # Filtering data for males
+        # Filtering dataset for males
         filter_df_males = data_filtered[data_filtered.gender == 'm']
         final_df_males = filter_df_males.sort_values(by=['Shape_Area'], ascending=False)
-        # Filteringdata for females
+        final_df_males = final_df_males.reset_index()
+        # Filtering dataset for females
         filter_df_females = data_filtered[data_filtered.gender == 'f']
         final_df_females = filter_df_females.sort_values(by=['Shape_Area'], ascending=False)
+        final_df_females = final_df_females.reset_index()
+        #Selecting the top 3 for males and females bubo bubos
         top_3_males = final_df_males.head(3)
         top_3_females = final_df_females.head(3)
         print(top_3_males)
         print(top_3_females)
+        #joining the tow datasets with the top 3 for males and females
         final_types = (list(set().union(top_3_males.CLC_CODE, top_3_females.CLC_CODE)))
         print(final_types)
         final_attributes = []
         area_totals_males = []
         area_totals_females = []
+        #loop to look for the area values for males and females bubo bubos according with the land-use classes already joined
+        #the values are divided by 10000 in order to have values in hectares
         for i in final_types:
             print(i)
             query_area_m = final_df_males.loc[final_df_males['CLC_CODE'] == i]
@@ -459,6 +539,11 @@ def data_preparation_CLC_graphs(path_summary_table, data_filtered,workspace, typ
         print(final_attributes)
         print(area_totals_males)
         print(area_totals_females)
+        #case when the joined land-use classes are less than 6.
+        #in this case the remaning slots for the graph are filled when selecting other land-use classes \
+        #according to the descending order of the area given by the original corine land cover for the\
+        #whole germany.
+        #the values are divided by 10000 in order to have values in hectares
         if len(final_attributes) < 6:
             for i in default_cod_ord_area:
                 if i not in final_types:
@@ -479,19 +564,24 @@ def data_preparation_CLC_graphs(path_summary_table, data_filtered,workspace, typ
             print(final_attributes)
             print(area_totals_males)
             print(area_totals_females)
-            createRadarGender("Male And Female Bubo Bubos", area_totals_males, area_totals_females, final_attributes,workspace,)
-    # Case for the seasons
+            createRadarGender("Mean area of selected male and female Bubo Bubos (ha)", area_totals_males, area_totals_females, final_attributes,workspace,)
+    ###Case when the user wants the graphs per season
     elif type_request == 2:
+        #getting the seasons from the dataset
         season_available = data_filtered.season.unique()
         print(season_available)
+        #setting up the main plot
         my_dpi = 96
         plt.figure(figsize=(1000 / my_dpi, 1000 / my_dpi), dpi=my_dpi)
-        # Create a color palette:
+        #creating the palette of colors for the seasons
         my_palette = plt.cm.get_cmap("Set2", 4)
         row = 0
+        #getting the maximum area in order to stablish the same scale for all the graphs
         maximum_Value_Area = data_filtered['Shape_Area'].max()
         arcpy.AddMessage("Maximum value =" + str(maximum_Value_Area))
+        #loop that allows the call of the fucntion to build the radar chart per season found
         for season in season_available:
+            #sorting the dataframe by area
             query_season = data_filtered.loc[data_filtered['season'] == season]
             final_df_season = query_season.sort_values(by=['Shape_Area'], ascending=False)
             final_df_season = final_df_season.reset_index()
@@ -500,11 +590,16 @@ def data_preparation_CLC_graphs(path_summary_table, data_filtered,workspace, typ
             area_totals = []
             codes_CLC = []
             i = 0
+            #the values are divided by 10000 in order to have values in hectares
             for i in range(len(final_df_season)):
                 types_LC.append(dic_codes[final_df_season.CLC_CODE[i]])
                 codes_CLC.append(str(final_df_season.CLC_CODE[i]))
                 area_totals.append(final_df_season.Shape_Area[i] / 10000)
             len_initial_types_LC = len(types_LC)
+            #case when the dataser has less than 6 land-use classes:
+            #in this case the remaning slots for the graph are filled when selecting other land-use classes \
+            #according to the descending order of the area given by the original corine land cover for the\
+            #whole germany with a value of 0.
             if len_initial_types_LC < 6:
                 for i in default_field_ord_area:
                     if i not in types_LC:
@@ -517,19 +612,13 @@ def data_preparation_CLC_graphs(path_summary_table, data_filtered,workspace, typ
                 types_LC = types_LC[0:6]
                 area_totals = area_totals[0:6]
 
-            createRadarSeasons(season, area_totals, types_LC, row, my_palette(row), maximum_Value_Area/10000)
+            createRadarSeasons("Mean area of Bubo Bubos in " + season + " (ha)", area_totals, types_LC, row, my_palette(row), maximum_Value_Area/10000)
             row += 1
 
-        '''# Loop to plot
-        for row in range(0, 4):
-            area_totals = area_totals[0:6]
-            print(area_totals)
-            createRadarSeasons("All Bubo Bubos", area_totals, types_LC, row, my_palette(row))
-            #make_spider( row=row, title='group '+df['group'][row], color=my_palette(row))'''
         plt.tight_layout()
         plt.savefig(os.path.join(workspace,"seasons.png"))
         plt.show()
-        plt.close() 
+        plt.close()
     else:
         print("Error with the type of request to draw the spider graph")
 
