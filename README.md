@@ -11,6 +11,7 @@ General instructions:
 Proposed selections for testing the toolbox, as the total running time takes 4-8 hours, depending on the used hardware:
 1.	 Lower amount of points: Bird-IDs 1750 and 1751. These owls are a couple. Estimated computation time: 2-4 minutes, depending on the used hardware.
 2.  	Higher amount of points: Bird-IDs 3892 and 3893. These owls are a couple. Estimated computation time: 6-10 minutes, depending on the used hardware.
+3.	Single bird with several seasons: Bird-ID 3897. Estimated computation time: 8-14 minutes, depending on the used hardware.
 
 Methodology:
 1.	Segregate the data of all birds.  
