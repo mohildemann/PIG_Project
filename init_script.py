@@ -56,7 +56,14 @@ def main(shapefile_birds, buffer_distance_territory, buffer_distance_territory_o
     # Do the actual calculation of the territories
     get_territories_from_selected_features(shapefile_birds, selected_seasons, selected_bird_ids,
                                            buffer_size, trash_path, df_metadata)
-
+    
+        #Setting the variables of the dataframe names to None
+    territory_w_landuse = None
+    territory_w_landuse_df = None
+    general_info = None
+    specific_landuse_info_season = None
+    specific_info_gender = None
+    
     # Getting the information of the landuse
     territory_w_landuse = extract_landuse_information(landuse_InputFeatures_name)
 
