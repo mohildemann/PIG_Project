@@ -262,6 +262,10 @@ def create_convex_hull(input, output_name, distance, bird_id, season, gender, tr
 
 
 def extract_landuse_information(landuse_vector):
+    if arcpy.Exists("merged_territories"):
+        arcpy.Delete_management("merged_territories")
+    if arcpy.Exists("merged_territories_w_landuse"):
+        arcpy.Delete_management("merged_territories_w_landuse")
     start = time.time()
     fcList = arcpy.ListFeatureClasses()
     input_merge = []
