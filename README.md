@@ -7,6 +7,8 @@ General instructions:
 5. 	The toolbox is called "Toolbox_bubo_bubo.tbx"
 6.	The results of a computation with all birds (4-8 hours computation time) is also contained in the folder, it is called  "all_the_birds_results"
 7. 	While running the toolbox, it is important to create a new folder like the example "all_the_birds_results" and use this as the  workspace at the toolbox input "Please select the folder where the results will be saved.".
+8.	The graphs being displayed indicate that the tool has finished running, close the resulting graphs to complete the processing.
+9.	It is recommended to maximize the resulting graphs to get the best User Experience.
 
 Proposed selections for testing the toolbox, as the total running time takes 4-8 hours, depending on the used hardware:
 1.	Lower amount of points: Bird-IDs 1750 and 1751. These owls are a couple. Estimated computation time: 2-4 minutes, depending on the used hardware.
