@@ -8,11 +8,9 @@ General instructions:
 6.	The results of a computation with all birds (4-8 hours computation time) is also contained in the folder, it is called  "all_the_birds_results"
 7. 	While running the toolbox, it is important to create a new folder like the example "all_the_birds_results" and use this as the  workspace at the toolbox input "Please select the folder where the results will be saved.".
 
-***PS: The data for this tool is taken and optimized for data from Movebank (https://www.movebank.org/). The tool can also be used if the data follows the same structure as that of data from Movebank.*** 
-
 Proposed selections for testing the toolbox, as the total running time takes 4-8 hours, depending on the used hardware:
-1.	 Lower amount of points: Bird-IDs 1750 and 1751. These owls are a couple. Estimated computation time: 2-4 minutes, depending on the used hardware.
-2.  	Higher amount of points: Bird-IDs 3892 and 3893. These owls are a couple. Estimated computation time: 6-10 minutes, depending on the used hardware.
+1.	Lower amount of points: Bird-IDs 1750 and 1751. These owls are a couple. Estimated computation time: 2-4 minutes, depending on the used hardware.
+2.	Higher amount of points: Bird-IDs 3892 and 3893. These owls are a couple. Estimated computation time: 6-10 minutes, depending on the used hardware.
 3.	Single bird with several seasons: Bird-ID 3897. Estimated computation time: 8-14 minutes, depending on the used hardware.
 
 Methodology:
@@ -37,3 +35,5 @@ iii.	Corine Landcover:
 	b.	Extract the Landcover taking (a) as input mask  
 	c.	Return the extracted Landcover  
 4.	Comparison based on User Choice.  
+
+***PS: The data for this tool is taken and optimized for data from Movebank (https://www.movebank.org/). The tool can also be used if the data follows the same structure as that of data from Movebank.*** 
