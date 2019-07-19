@@ -54,7 +54,7 @@ def main(shapefile_birds, buffer_distance_territory, buffer_distance_territory_o
     df_metadata["tag-id"] = df_metadata["tag-id"].astype(str)
 
     # Do the actual calculation of the territories
-    get_territories_from_selected_features(shapefile_birds, selected_seasons, selected_bird_ids,
+    get_territories_from_selected_features(shapefile_birds, selected_seasons,selected_gender, selected_bird_ids,
                                            buffer_size, trash_path, df_metadata)
     
         #Setting the variables of the dataframe names to None
@@ -178,11 +178,12 @@ def select_features_by_season(input_features, selected_seasons, output_name):
 def filter_by_gender(bird_ids, metadata, selected_gender):
     remaining_ids = []
     for i in bird_ids:
-        if metadata[metadata["tag-id"]== str(i)]["gender"] == selected_gender:
+        metadata_bird = metadata[metadata["tag-id"] == str(i)]
+        if metadata_bird["animal-sex"].all() == selected_gender:
             remaining_ids.append(i)
     return remaining_ids
 
-def get_territories_from_selected_features(all_birds, selected_seasons, selected_bird_ids, buffer_size, trash,
+def get_territories_from_selected_features(all_birds, selected_seasons,selected_gender, selected_bird_ids, buffer_size, trash,
                                            metadata=None):
     unique_bird_ids = unique_values(all_birds, 'tag_ident')
     selected_birds = unique_bird_ids
@@ -195,7 +196,7 @@ def get_territories_from_selected_features(all_birds, selected_seasons, selected
     #fill the empty column "time" with the season
     update_datetime_to_seasons(all_birds)
 
-    if select_gender_boolean.lower == "true":
+    if len(select_gender_boolean)>0:
         selected_birds = filter_by_gender(selected_birds, metadata, selected_gender)
 
     for season_iterator in range(len(selected_seasons)):
